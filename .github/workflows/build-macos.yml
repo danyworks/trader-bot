@@ -1,4 +1,4 @@
-name: Build & Release
+name: '   '
 on:
   workflow_call:
     inputs:
@@ -18,7 +18,7 @@ on:
         required: false
         type: boolean
         default: false
-        
+
 jobs:
   build:
     strategy:
