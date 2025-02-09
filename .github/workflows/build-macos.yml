@@ -1,4 +1,4 @@
-name: '   '
+
 on:
   workflow_call:
     inputs:
@@ -42,9 +42,7 @@ jobs:
           
       - name: Install macOS Dependencies
         run: |
-          brew install pkg-config
           brew install gtk+3
-          brew install gcc
 
       - name: Install Wails
         shell: bash
