@@ -18,17 +18,14 @@ on:
         required: false
         type: boolean
         default: false
+      artifact_name:
+        required: false
+        type: string
+        default: 'trading-bot-macos-arm64'
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [macos-latest]
-        include:
-          - os: macos-latest
-            platform: macos
-            artifact_name: app-macos
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-latest
     
     steps:
       - uses: actions/checkout@v4
@@ -38,28 +35,10 @@ jobs:
         with:
           go-version: ${{ inputs.go-version }}
 
-      - name: Cache Go dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
-
-      - name: Cache node modules
-        uses: actions/cache@v4
-        with:
-          path: frontend/node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
           
       - name: Install macOS Dependencies
         run: |
@@ -99,18 +78,15 @@ jobs:
           xcodebuild -version
 
       - name: Build Wails App (macOS)
-        if: ${{ inputs.debug == 'false' }}
         run: |
           wails build -platform darwin/arm64
-          # Create DMG
           npm install -g create-dmg
           create-dmg build/bin/*.app build/bin/ || true
           
       - name: Upload macOS Artifacts
-        if: ${{ inputs.debug == 'false' }}
         uses: actions/upload-artifact@v4
         with:
-          name: app-macos
+          name: ${{ inputs.artifact_name }}
           path: |
             build/bin/*.app
             build/bin/*.dmg

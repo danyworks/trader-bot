@@ -18,17 +18,14 @@ on:
         required: false
         type: boolean
         default: false
+      artifact_name:
+        required: false
+        type: string
+        default: 'trading-bot-windows-amd64'
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [windows-latest]
-        include:
-          - os: windows-latest
-            platform: windows
-            artifact_name: app-windows
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
     
     steps:
       - uses: actions/checkout@v4
@@ -44,7 +41,6 @@ jobs:
           node-version: ${{ inputs.node-version }}
           
       - name: Install Windows Dependencies
-        if: matrix.os == 'windows-latest'
         run: |
           # Install required tools for NSIS
           choco install nsis
@@ -82,16 +78,15 @@ jobs:
           echo "Checking MSVC version..."
           cl.exe
           
-      - name: Build Wails App (Windows)
+      - name: Build Wails App (Windows/amd64)
         if: ${{ inputs.debug == 'false' }}
         run: |
           wails build -platform windows/amd64 -nsis
                    
       - name: Upload Windows Artifacts
-        if: ${{ inputs.debug == 'false' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact_name }}
+          name: ${{ inputs.artifact_name }}
           path: |
             build/bin/*.exe
             build/bin/*.msi
