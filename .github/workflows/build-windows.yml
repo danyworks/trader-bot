@@ -77,7 +77,6 @@ jobs:
           vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
           
       - name: Build Wails App (Windows/amd64)
-        if: ${{ inputs.debug == 'false' }}
         run: |
           wails build -nsis
                    
