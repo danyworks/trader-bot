@@ -75,13 +75,11 @@ jobs:
           systeminfo | findstr /B /C:"OS Name" /C:"OS Version"
           echo "Checking Visual Studio version..."
           vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
-          echo "Checking MSVC version..."
-          cl.exe
           
       - name: Build Wails App (Windows/amd64)
         if: ${{ inputs.debug == 'false' }}
         run: |
-          wails build -platform windows/amd64 -nsis
+          wails build -nsis
                    
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
