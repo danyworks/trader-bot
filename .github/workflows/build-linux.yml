@@ -29,7 +29,7 @@ jobs:
             platform: linux
             artifact_name: app-linux
     runs-on: ${{ matrix.os }}
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -53,6 +53,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
+      - name: Fix APT Cache Permissions
+        run: |
+          sudo chmod -R 777 /var/cache/apt/archives /var/lib/apt/lists
+
       - name: APT Cache
         uses: actions/cache@v4
         with:
@@ -62,8 +66,6 @@ jobs:
           key: ${{ runner.os }}-apt-${{ hashFiles('.github/workflows/*') }}
           restore-keys: |
             ${{ runner.os }}-apt-
-        run: |
-          sudo chmod -R 777 /var/cache/apt/archives /var/lib/apt/lists
 
       - name: Set up Go
         uses: actions/setup-go@v5
