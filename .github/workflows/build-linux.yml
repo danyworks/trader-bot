@@ -125,11 +125,11 @@ jobs:
         run: |
           wails build -platform linux/amd64 -tags webkit2_41
 
-      # - name: Upload Linux Artifacts
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: ${{ matrix.artifact_name }}
-      #     path: build/bin/*
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: build/bin/*
 
       # Optional: Sign the apps for production
       # Note: You'll need to set up code signing certificates and secrets
