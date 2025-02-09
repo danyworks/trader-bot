@@ -16,19 +16,27 @@ on:
           - linux
           - macos
           - windows
+      debug:
+        description: "Enable debug mode"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   linux:
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'linux'
     uses: ./.github/workflows/build-linux.yml
-    debug: true
-
+    with:
+      debug: ${{ github.event.inputs.debug }}
+  
   macos:
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'macos'
     uses: ./.github/workflows/build-macos.yml
-    debug: true
+    with:
+      debug: ${{ github.event.inputs.debug }}
 
   windows:
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'windows'
     uses: ./.github/workflows/build-windows.yml
-    debug: true
+    with:
+      debug: ${{ github.event.inputs.debug }}
