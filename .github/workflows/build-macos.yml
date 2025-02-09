@@ -101,7 +101,7 @@ jobs:
       - name: Build Wails App (macOS)
         if: ${{ inputs.debug == 'false' }}
         run: |
-          wails build -platform darwin/amd64
+          wails build -platform darwin/arm64
           # Create DMG
           npm install -g create-dmg
           create-dmg build/bin/*.app build/bin/ || true

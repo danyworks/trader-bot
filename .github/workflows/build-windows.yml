@@ -50,8 +50,6 @@ jobs:
           choco install nsis
           # Install mingw for gcc
           choco install mingw
-          # Refresh environment variables
-          refreshenv
 
       - name: Install Wails
         shell: bash
