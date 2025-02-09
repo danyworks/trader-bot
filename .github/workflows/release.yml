@@ -1,0 +1,34 @@
+name: Release
+on:
+  # push:
+  #   branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Select platform to build"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - linux
+          - macos
+          - windows
+
+jobs:
+  linux:
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'linux'
+    uses: ./.github/workflows/build-linux.yml
+    debug: true
+
+  macos:
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'macos'
+    uses: ./.github/workflows/build-macos.yml
+    debug: true
+
+  windows:
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'windows'
+    uses: ./.github/workflows/build-windows.yml
+    debug: true

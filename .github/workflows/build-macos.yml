@@ -1,0 +1,103 @@
+name: Build & Release
+on:
+  workflow_call:
+    inputs:
+      go-version:
+        required: false
+        type: string
+        default: '1.23.6'
+      node-version:
+        required: false
+        type: string
+        default: '22.x'
+      wails-version:
+        required: false
+        type: string
+        default: 'v2.9.2'
+      debug:
+        required: false
+        type: boolean
+        default: false
+        
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest]
+        include:
+          - os: macos-latest
+            platform: macos
+            artifact_name: app-macos
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ inputs.go-version }}
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          
+      - name: Install macOS Dependencies
+        run: |
+          brew install pkg-config
+          brew install gtk+3
+          brew install webkit2gtk-4.1
+          brew install gcc
+
+      - name: Install Wails
+        shell: bash
+        run: |
+          go install github.com/wailsapp/wails/v2/cmd/wails@${{ inputs.wails-version }}
+          
+      - name: Build Frontend
+        working-directory: frontend
+        run: |
+          npm install
+          npm run build
+          
+      - name: Debug
+        if: ${{ inputs.debug }}
+        run: |
+          echo "Checking Wails doctor..."
+          wails doctor
+          echo "Checking Wails version..."
+          wails version
+          echo "Checking Go version..."
+          go version
+          echo "Checking Node.js version..."
+          node --version
+          echo "Checking npm version..."
+          npm --version
+          echo "Checking path..."
+          ls -lah $GITHUB_WORKSPACE
+          echo "Checking macOS version..."
+          sw_vers
+          echo "Checking Xcode version..."
+          xcodebuild -version
+
+      # - name: Build Wails App (macOS)
+      #   run: |
+      #     wails build -platform darwin/amd64
+      #     # Create DMG
+      #     npm install -g create-dmg
+      #     create-dmg build/bin/*.app build/bin/ || true
+          
+      # - name: Upload macOS Artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: app-macos
+      #     path: |
+      #       build/bin/*.app
+      #       build/bin/*.dmg
+
+      # Optional: Sign the apps for production
+      # - name: Sign macOS App
+      #   if: github.event_name == 'release'
+      #   run: |
+      #     echo "Add your codesigning steps here"

@@ -1,0 +1,110 @@
+name: Build & Release
+on:
+  workflow_call:
+    inputs:
+      go-version:
+        required: false
+        type: string
+        default: '1.23.6'
+      node-version:
+        required: false
+        type: string
+        default: '22.x'
+      wails-version:
+        required: false
+        type: string
+        default: 'v2.9.2'
+      debug:
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest]
+        include:
+          - os: windows-latest
+            platform: windows
+            artifact_name: app-windows
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ inputs.go-version }}
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          
+      - name: Install Windows Dependencies
+        if: matrix.os == 'windows-latest'
+        run: |
+          # Install required tools for NSIS
+          choco install nsis
+          # Install mingw for gcc
+          choco install mingw
+          # Refresh environment variables
+          refreshenv
+
+      - name: Install Wails
+        shell: bash
+        run: |
+          go install github.com/wailsapp/wails/v2/cmd/wails@${{ inputs.wails-version }}
+          
+      - name: Build Frontend
+        working-directory: frontend
+        run: |
+          npm install
+          npm run build
+
+      - name: Debug
+        if: ${{ inputs.debug }}
+        run: |
+          echo "Checking Wails doctor..."
+          wails doctor
+          echo "Checking Wails version..."
+          wails version
+          echo "Checking Go version..."
+          go version
+          echo "Checking Node.js version..."
+          node --version
+          echo "Checking npm version..."
+          npm --version
+          echo "Checking path..."
+          ls -lah $GITHUB_WORKSPACE
+          echo "Checking Windows version..."
+          systeminfo | findstr /B /C:"OS Name" /C:"OS Version"
+          echo "Checking Visual Studio version..."
+          vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          echo "Checking MSVC version..."
+          cl.exe
+          
+      # - name: Build Wails App (Windows)
+      #   if: matrix.os == 'windows-latest'
+      #   run: |
+      #     $env:PATH += ";C:\Program Files (x86)\NSIS"
+      #     $env:PATH += ";C:\Program Files\Go\bin"
+      #     wails build -platform windows/amd64 -nsis
+                   
+      # - name: Upload Windows Artifacts
+      #   if: matrix.os == 'windows-latest'
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ${{ matrix.artifact_name }}
+      #     path: |
+      #       build/bin/*.exe
+      #       build/bin/*.msi
+
+      # Optional: Sign the apps for production
+      # Note: You'll need to set up code signing certificates and secrets          
+      # - name: Sign Windows App
+      #   if: matrix.os == 'windows-latest' && github.event_name == 'release'
+      #   run: |
+      #     echo "Add your codesigning steps here"
