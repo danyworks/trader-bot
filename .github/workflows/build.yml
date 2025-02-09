@@ -1,6 +1,6 @@
 name: Build Wails App
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       go-version:
         required: false
