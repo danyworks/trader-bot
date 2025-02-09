@@ -28,21 +28,21 @@ jobs:
     uses: ./.github/workflows/build-linux.yml
     with:
       debug: ${{ github.event.inputs.debug == 'true' }}
-      artifact_name: "trading-bot_linux_amd64"
+      artifact_name: trading-bot_linux_amd64
   
   macos:
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'macos'
     uses: ./.github/workflows/build-macos.yml
     with:
       debug: ${{ github.event.inputs.debug == 'true' }}
-      artifact_name: "trading-bot_macos_arm64"
+      artifact_name: trading-bot_macos_arm64
 
   windows:
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.target == 'all' || github.event.inputs.target == 'windows'
     uses: ./.github/workflows/build-windows.yml
     with:
       debug: ${{ github.event.inputs.debug == 'true' }}
-      artifact_name: "trading-bot_windows_amd64"
+      artifact_name: trading-bot_windows_amd64
 
   release:
     needs: [linux, macos, windows]
@@ -54,19 +54,19 @@ jobs:
       - name: Download Linux artifact
         uses: actions/download-artifact@v4
         with:
-          name: "trading-bot_linux_amd64"
+          name: trading-bot_linux_amd64
           path: artifacts
 
       - name: Download macOS artifact
         uses: actions/download-artifact@v4
         with:
-          name: "trading-bot_macos_arm64"
+          name: trading-bot_macos_arm64
           path: artifacts
 
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
-          name: "trading-bot_windows_amd64"
+          name: trading-bot_windows_amd64
           path: artifacts
 
       - name: Read release message
@@ -77,9 +77,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/"trading-bot_linux_amd64"
-            artifacts/"trading-bot_macos_arm64"
-            artifacts/"trading-bot_windows_amd64"
+            artifacts/trading-bot_linux_amd64
+            artifacts/trading-bot_macos_arm64
+            artifacts/trading-bot_windows_amd64
           body: ${{ steps.release_message.outputs.message }}
           tag_name: ${{ github.ref_name }}
         env:
