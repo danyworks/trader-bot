@@ -81,20 +81,22 @@ jobs:
           echo "Checking Xcode version..."
           xcodebuild -version
 
-      # - name: Build Wails App (macOS)
-      #   run: |
-      #     wails build -platform darwin/amd64
-      #     # Create DMG
-      #     npm install -g create-dmg
-      #     create-dmg build/bin/*.app build/bin/ || true
+      - name: Build Wails App (macOS)
+        if: ${{ inputs.debug == 'false' }}
+        run: |
+          wails build -platform darwin/amd64
+          # Create DMG
+          npm install -g create-dmg
+          create-dmg build/bin/*.app build/bin/ || true
           
-      # - name: Upload macOS Artifacts
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: app-macos
-      #     path: |
-      #       build/bin/*.app
-      #       build/bin/*.dmg
+      - name: Upload macOS Artifacts
+        if: ${{ inputs.debug == 'false' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-macos
+          path: |
+            build/bin/*.app
+            build/bin/*.dmg
 
       # Optional: Sign the apps for production
       # - name: Sign macOS App

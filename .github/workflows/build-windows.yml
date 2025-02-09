@@ -86,21 +86,21 @@ jobs:
           echo "Checking MSVC version..."
           cl.exe
           
-      # - name: Build Wails App (Windows)
-      #   if: matrix.os == 'windows-latest'
-      #   run: |
-      #     $env:PATH += ";C:\Program Files (x86)\NSIS"
-      #     $env:PATH += ";C:\Program Files\Go\bin"
-      #     wails build -platform windows/amd64 -nsis
+      - name: Build Wails App (Windows)
+        if: ${{ inputs.debug == 'false' }}
+        run: |
+          $env:PATH += ";C:\Program Files (x86)\NSIS"
+          $env:PATH += ";C:\Program Files\Go\bin"
+          wails build -platform windows/amd64 -nsis
                    
-      # - name: Upload Windows Artifacts
-      #   if: matrix.os == 'windows-latest'
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: ${{ matrix.artifact_name }}
-      #     path: |
-      #       build/bin/*.exe
-      #       build/bin/*.msi
+      - name: Upload Windows Artifacts
+        if: ${{ inputs.debug == 'false' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: |
+            build/bin/*.exe
+            build/bin/*.msi
 
       # Optional: Sign the apps for production
       # Note: You'll need to set up code signing certificates and secrets          

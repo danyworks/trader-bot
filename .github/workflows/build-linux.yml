@@ -1,4 +1,4 @@
-name: '   '
+name: Build
 on:
   workflow_call:
     inputs:
@@ -29,7 +29,7 @@ jobs:
             platform: linux
             artifact_name: app-linux
     runs-on: ${{ matrix.os }}
-
+    
     steps:
       - uses: actions/checkout@v4
 
@@ -62,18 +62,14 @@ jobs:
           key: ${{ runner.os }}-apt-${{ hashFiles('.github/workflows/*') }}
           restore-keys: |
             ${{ runner.os }}-apt-
-
-      - name: Wails Cache
-        uses: actions/cache@v4
-        with:
-          path: ~/go/bin/wails
-          key: ${{ runner.os }}-wails-${{ inputs.wails-version }}
+        run: |
+          sudo chmod -R 777 /var/cache/apt/archives /var/lib/apt/lists
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ inputs.go-version }}
-          
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -96,7 +92,7 @@ jobs:
           if [ ! -f ~/go/bin/wails ]; then
             go install github.com/wailsapp/wails/v2/cmd/wails@${{ inputs.wails-version }}
           fi
-          
+
       - name: Build Frontend
         working-directory: frontend
         run: |
