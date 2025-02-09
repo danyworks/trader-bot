@@ -75,8 +75,6 @@ jobs:
           node --version
           echo "Checking npm version..."
           npm --version
-          echo "Checking path..."
-          ls -lah $GITHUB_WORKSPACE
           echo "Checking Windows version..."
           systeminfo | findstr /B /C:"OS Name" /C:"OS Version"
           echo "Checking Visual Studio version..."
@@ -87,8 +85,6 @@ jobs:
       - name: Build Wails App (Windows)
         if: ${{ inputs.debug == 'false' }}
         run: |
-          $env:PATH += ";C:\Program Files (x86)\NSIS"
-          $env:PATH += ";C:\Program Files\Go\bin"
           wails build -platform windows/amd64 -nsis
                    
       - name: Upload Windows Artifacts
