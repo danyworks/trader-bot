@@ -32,7 +32,43 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      
+
+      - name: Go Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Node Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            frontend/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: APT Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/cache/apt/archives
+            /var/lib/apt/lists
+          key: ${{ runner.os }}-apt-${{ hashFiles('.github/workflows/*') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
+      - name: Wails Cache
+        uses: actions/cache@v4
+        with:
+          path: ~/go/bin/wails
+          key: ${{ runner.os }}-wails-${{ inputs.wails-version }}
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
@@ -42,6 +78,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Install Linux Dependencies
         if: matrix.os == 'ubuntu-latest'
@@ -55,12 +93,16 @@ jobs:
       - name: Install Wails
         shell: bash
         run: |
-          go install github.com/wailsapp/wails/v2/cmd/wails@${{ inputs.wails-version }}
+          if [ ! -f ~/go/bin/wails ]; then
+            go install github.com/wailsapp/wails/v2/cmd/wails@${{ inputs.wails-version }}
+          fi
           
       - name: Build Frontend
         working-directory: frontend
         run: |
-          npm install
+          if [ ! -d "node_modules" ]; then
+            npm install
+          fi
           npm run build
 
       - name: Debug
@@ -79,9 +121,9 @@ jobs:
           echo "Checking path..."
           ls -lah $GITHUB_WORKSPACE
 
-      # - name: Build Wails App (Linux)
-      #   run: |
-      #     wails build -platform linux/amd64 -tags webkit2_41
+      - name: Build Wails App (Linux)
+        run: |
+          wails build -platform linux/amd64 -tags webkit2_41
 
       # - name: Upload Linux Artifacts
       #   uses: actions/upload-artifact@v4
